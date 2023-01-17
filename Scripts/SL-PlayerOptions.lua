@@ -248,13 +248,7 @@ local Overrides = {
 	},
 	-------------------------------------------------------------------------
 	BackgroundFilter = {
-		Choices = function()
-			local first = 0
-			local last = 100
-			local step = 1
-			
-			return range(first,last,step)
-		end
+		Values = { 'Off','Dark','Darker','Darkest' },
 	},
 	-------------------------------------------------------------------------
 	Mini = {
