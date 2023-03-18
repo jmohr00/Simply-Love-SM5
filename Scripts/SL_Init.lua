@@ -58,6 +58,8 @@ local PlayerDefaults = {
 				FlashGreat = false,
 				FlashExcellent = false,
 				FlashFantastic = false,
+				
+				TiltMultiplier = 1,
 			}
 			-- TODO(teejusb): Rename "Streams" as the data contains more information than that.
 			self.Streams = {
@@ -92,7 +94,10 @@ local PlayerDefaults = {
 				Stats = {}
 			}
 			self.PlayerOptionsString = nil
-			self.ITLData = {}
+			self.ITLData = {
+				["pathMap"] = {},
+				["hashMap"] = {},
+			}
 
 			-- default panes to intialize ScreenEvaluation to
 			-- when only a single player is joined (single, double)
@@ -458,6 +463,10 @@ SL = {
 		-- be loaded before this file.
 		UnlocksCache = LoadUnlocksCache(),
 	},
+	-- Bar measure display
+	ShowBeatBars = false,
+	BarMeasureAlpha = 0.50,
+	Bar4thAlpha=0.25,
 	-- Stores all active/failed downloads.
 	-- Each entry is keyed on a string UUID which maps to a table with the
 	-- following keys:
@@ -471,11 +480,7 @@ SL = {
 	--              (either success or failure).
 	-- If a request fails, there will be another key:
 	--    ErrorMessage: string, the reasoning for the failure.
-	Downloads = {},
-	-- Bar measure display
-	ShowBeatBars = false,
-	BarMeasureAlpha = 0.50,
-	Bar4thAlpha=0.25
+	Downloads = {}
 }
 
 

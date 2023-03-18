@@ -69,6 +69,16 @@ local af = Def.ActorFrame{
 			self:queuecommand("Redraw")
 		end
 	end,
+	CodeMessageCommand=function(self, params)
+		-- Toggle between the density graph and the pattern info
+		if params.Name == "TogglePatternInfo" and params.PlayerNumber == player then
+			-- Only need to toggle in versus since in single player modes, both
+			-- panes are already displayed.
+			if GAMESTATE:GetNumSidesJoined() == 2 then
+				self:queuecommand("TogglePatternInfo")
+			end
+		end
+	end,
 }
 
 -- Background quad for the density graph
@@ -127,6 +137,9 @@ af2[#af2+1] = NPS_Histogram(player, width, height)..{
 	end,
 	RedrawCommand=function(self)
 		self:visible(true)
+	end,
+	TogglePatternInfoCommand=function(self)
+		self:visible(not self:GetVisible())
 	end
 }
 -- Don't let the density graph parse the chart.
@@ -158,9 +171,8 @@ af2[#af2+1] = LoadFont("Common Normal")..{
 			end
 			self:settext("Peak NPS: ")		
 		end
-
-		-- We want black text in Rainbow mode, white otherwise.
-		self:diffuse(ThemePrefs.Get("RainbowMode") and {0, 0, 0, 1} or {1, 1, 1, 1})
+		-- We want black text in Rainbow mode except during HolidayCheer(), white otherwise.
+		self:diffuse((ThemePrefs.Get("RainbowMode") and not HolidayCheer()) and {0, 0, 0, 1} or {1, 1, 1, 1})
 	end,
 	HideCommand=function(self)
 		if #GAMESTATE:GetHumanPlayers() == 1 then 
@@ -209,6 +221,9 @@ af2[#af2+1] = LoadFont("Common Normal")..{
 	OffCommand=function(self)
 		self:stoptweening()
 	end,
+	TogglePatternInfoCommand=function(self)
+		self:visible(not self:GetVisible())
+	end
 }
 
 -- Breakdown
@@ -224,7 +239,9 @@ af2[#af2+1] = Def.ActorFrame{
 	RedrawCommand=function(self)
 		self:visible(true)
 	end,
-
+	TogglePatternInfoCommand=function(self)
+		self:visible(not self:GetVisible())
+	end,
 	Def.Quad{
 		InitCommand=function(self)
 			local bgHeight = 17
@@ -283,11 +300,24 @@ af2[#af2+1] = Def.ActorFrame{
 	end,
 	PlayerJoinedMessageCommand=function(self, params)
 		self:visible(GAMESTATE:GetNumSidesJoined() == 1)
+		if GAMESTATE:GetNumSidesJoined() == 2 then
+			self:y(0)
+		else
+			self:y(88 * (player == PLAYER_1 and 1 or -1))
+		end
 	end,
 	PlayerUnjoinedMessageCommand=function(self, params)
 		self:visible(GAMESTATE:GetNumSidesJoined() == 1)
+		if player == PLAYER_1 then
+			self:y(38 + 24)
+		else
+			self:y(-38 - 80)
+		end
 	end,
-
+	TogglePatternInfoCommand=function(self)
+		self:visible(not self:GetVisible())
+	end,
+	
 	-- Background for the additional chart info.
 	-- Only shown in 1 Player mode
 	Def.Quad{
