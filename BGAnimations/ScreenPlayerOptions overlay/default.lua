@@ -20,18 +20,41 @@ local song = GAMESTATE:GetCurrentSong()
 ------------------------------------------------------------
 -- functions local to this file
 
+-- Use this function to find an OptionRow by name so that you can manipulate its text as needed.
+--     first argument is a screen object provided by SCREENMAN:GetTopScreen()
+--     second argument is a string that might match the name of an OptionRow somewhere on this screen
+--
+--     returns the 0-based index of that OptionRow within this screen
+
+local FindOptionRowIndex = function(ScreenOptions, Name)
+	if not ScreenOptions or not ScreenOptions.GetNumRows then return end
+
+	local num_rows = ScreenOptions:GetNumRows()
+
+	-- OptionRows on ScreenOptions are 0-indexed, so start counting from 0
+	for i=0,num_rows-1 do
+		if ScreenOptions:GetOptionRow(i):GetName() == Name then
+			return i
+		end
+	end
+end
+
 -- this prepares and returns a string to be used by the helper BitmapText
 -- that shows players their effective scrollspeed
 
 local CalculateScrollSpeed = function(player)
 	player   = player or GAMESTATE:GetMasterPlayerNumber()
 	local pn = ToEnumShortString(player)
+	local topscreen = SCREENMAN:GetTopScreen()
 
 	local StepsOrTrail = (GAMESTATE:IsCourseMode() and GAMESTATE:GetCurrentTrail(player)) or GAMESTATE:GetCurrentSteps(player)
 	local MusicRate    = SL.Global.ActiveModifiers.MusicRate or 1
 
 	local SpeedModType = SL[pn].ActiveModifiers.SpeedModType
 	local SpeedMod     = SL[pn].ActiveModifiers.SpeedMod
+
+	local MiniRow = FindOptionRowIndex(topscreen, "Mini")
+	local MiniPercent = -100 + topscreen:GetOptionRow(MiniRow):GetChoiceInRowWithFocus(pn)
 
 	local bpms = GetDisplayBPMs(player, StepsOrTrail, MusicRate)
 	if not (bpms and bpms[1] and bpms[2]) then return "" end
@@ -48,6 +71,9 @@ local CalculateScrollSpeed = function(player)
 		bpms[1] = SpeedMod
 		bpms[2] = SpeedMod
 	end
+
+	bpms[1] = bpms[1] * (200 - MiniPercent) / 200
+	bpms[2] = bpms[2] * (200 - MiniPercent) / 200
 
 	-- format as strings
 	bpms[1] = ("%.0f"):format(bpms[1])
@@ -77,25 +103,6 @@ local ChangeSpeedMod = function(pn, direction)
 	mods.SpeedMod = speedmod
 end
 
-
--- Use this function to find an OptionRow by name so that you can manipulate its text as needed.
---     first argument is a screen object provided by SCREENMAN:GetTopScreen()
---     second argument is a string that might match the name of an OptionRow somewhere on this screen
---
---     returns the 0-based index of that OptionRow within this screen
-
-local FindOptionRowIndex = function(ScreenOptions, Name)
-	if not ScreenOptions or not ScreenOptions.GetNumRows then return end
-
-	local num_rows = ScreenOptions:GetNumRows()
-
-	-- OptionRows on ScreenOptions are 0-indexed, so start counting from 0
-	for i=0,num_rows-1 do
-		if ScreenOptions:GetOptionRow(i):GetName() == Name then
-			return i
-		end
-	end
-end
 
 ------------------------------------------------------------
 
