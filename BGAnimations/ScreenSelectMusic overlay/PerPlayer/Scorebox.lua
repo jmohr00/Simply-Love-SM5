@@ -185,6 +185,9 @@ local LeaderboardRequestProcessor = function(res, master)
 
 			if data[playerStr]["itl"]["itlLeaderboard"] then
 				for entry in ivalues(data[playerStr]["itl"]["itlLeaderboard"]) do
+					if entry["isSelf"] then
+						UpdateItlExScore(player, SL[pn].Streams.Hash, entry["score"])
+					end
 					numEntries = numEntries + 1
 					SetScoreData(3, numEntries,
 									tostring(entry["rank"]),
@@ -395,6 +398,10 @@ local af = Def.ActorFrame{
 				self:GetParent():GetChild("ITLLogo"):diffusealpha(0):visible(false)
 				self:GetParent():GetChild("Outline"):diffusealpha(0):visible(false)
 				self:GetParent():GetChild("Background"):diffusealpha(0):visible(false)
+				
+				if IsItlSong(player) then
+					UpdatePathMap(player, SL[pn].Streams.Hash)
+				end
 				
 				self:playcommand("MakeGrooveStatsRequest", {
 					endpoint="player-leaderboards.php?"..NETWORK:EncodeQueryParameters(query),
